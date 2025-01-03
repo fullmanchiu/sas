@@ -4,7 +4,9 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,14 +18,14 @@ public class AppConfigAdapter extends RecyclerView.Adapter<AppConfigAdapter.View
     private List<AppInfo> mAppList;
     private Context mContext;
 
-    public interface OnItemClickListener {
-        void onItemClick(View view, int position);
+    private OnItemCheckedChangeListener mOnItemCheckedChangeListener;
+
+    public interface OnItemCheckedChangeListener {
+        void onItemCheckedChange(CompoundButton buttonView, int position, boolean isChecked);
     }
 
-    private OnItemClickListener mOnItemClickListener;
-
-    public void setOnItemClickListener(OnItemClickListener mOnItemClickListener) {
-        this.mOnItemClickListener = mOnItemClickListener;
+    public void setOnItemCheckedChangeListener(OnItemCheckedChangeListener mOnItemCheckedChangeListener) {
+        this.mOnItemCheckedChangeListener = mOnItemCheckedChangeListener;
     }
 
     public AppConfigAdapter(Context context, List<AppInfo> appList) {
@@ -53,21 +55,18 @@ public class AppConfigAdapter extends RecyclerView.Adapter<AppConfigAdapter.View
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView appIcon;
         public TextView appName;
+        public Switch switchConfig;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             appIcon = itemView.findViewById(R.id.app_icon);
             appName = itemView.findViewById(R.id.app_name);
-            itemView.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (mOnItemClickListener != null) {
-                                mOnItemClickListener.onItemClick(v, getAdapterPosition());
-                            }
-                        }
-                    }
-            );
+            switchConfig = itemView.findViewById(R.id.switch_config);
+            switchConfig.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (mOnItemCheckedChangeListener != null) {
+                    mOnItemCheckedChangeListener.onItemCheckedChange(buttonView, getAdapterPosition(), isChecked);
+                }
+            });
         }
     }
 

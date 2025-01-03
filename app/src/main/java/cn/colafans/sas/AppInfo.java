@@ -10,4 +10,5 @@ public class AppInfo {
 
     public int itemPos;
     public String allappIcon;
+    public boolean isFullScreen;
 }

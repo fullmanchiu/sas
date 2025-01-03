@@ -102,6 +102,18 @@ public class MainActivity extends AppCompatActivity {
         appConfigAdapter = new AppConfigAdapter(mContext, mAppList);
         rvAppConfig.setLayoutManager(new LinearLayoutManager(mContext));
         rvAppConfig.setAdapter(appConfigAdapter);
+        appConfigAdapter.setOnItemCheckedChangeListener((buttonView, position, isChecked) -> {
+            AppInfo appInfo = mAppList.get(position);
+            appInfo.isFullScreen = buttonView.isChecked();
+            String config = Settings.Global.getString(mContext.getContentResolver(), "policy_control");
+            if (appInfo.isFullScreen) {
+                config = config + "," + appInfo.pkgName;
+            } else {
+                config = config.replace(appInfo.pkgName, "");
+            }
+            Settings.Global.putString(mContext.getContentResolver(), "policy_control", config);
+
+        });
         // 设置关闭按钮的点击事件
         Switch fullScreen = popupView.findViewById(R.id.sb_full_screen);
         fullScreen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
