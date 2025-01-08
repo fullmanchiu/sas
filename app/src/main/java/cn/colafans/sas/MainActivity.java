@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,13 +43,14 @@ public class MainActivity extends AppCompatActivity {
     private Handler mHandler = new Handler();
     private Runnable mRunnable = () -> clickCount = 0;
     private PopupWindow popupWindow;
+    String config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mContext = this;
+        config = Settings.Global.getString(mContext.getContentResolver(), "policy_control");
         rvAppList = findViewById(R.id.rv_app_list);
         executorService = Executors.newSingleThreadExecutor();
         tvHint = findViewById(R.id.tv_hint);
@@ -57,12 +59,6 @@ public class MainActivity extends AppCompatActivity {
             clickCount++;
             if (clickCount == 5) {
                 Toast.makeText(mContext, "aaaa", Toast.LENGTH_SHORT).show();
-                try {
-                    Settings.Global.putString(mContext.getContentResolver(), "policy_control", "immersive.full=*");
-                } catch (Exception e) {
-                    Log.e(TAG, "onCreate: ", e);
-                }
-
                 //TODO settings pop/activity
                 clickCount = 0;
             }
@@ -76,7 +72,9 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private void showPopupWindow() {
+        config = Settings.Global.getString(mContext.getContentResolver(), "policy_control");
         // 创建 PopupWindow 的内容视图
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_window_layout, null);
@@ -103,31 +101,21 @@ public class MainActivity extends AppCompatActivity {
         rvAppConfig.setLayoutManager(new LinearLayoutManager(mContext));
         rvAppConfig.setAdapter(appConfigAdapter);
         appConfigAdapter.setOnItemCheckedChangeListener((buttonView, position, isChecked) -> {
-            AppInfo appInfo = mAppList.get(position);
-            appInfo.isFullScreen = buttonView.isChecked();
-            String config = Settings.Global.getString(mContext.getContentResolver(), "policy_control");
-            if (appInfo.isFullScreen) {
-                config = config + "," + appInfo.pkgName;
-            } else {
-                config = config.replace(appInfo.pkgName, "");
-            }
-            Settings.Global.putString(mContext.getContentResolver(), "policy_control", config);
-
-        });
-        // 设置关闭按钮的点击事件
-        Switch fullScreen = popupView.findViewById(R.id.sb_full_screen);
-        fullScreen.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                if (isChecked) {
-                    //Settings.Global.putString(mContext.getContentResolver(), "policy_control", "immersive.full=*");
-                    Settings.Global.putString(mContext.getContentResolver(), "policy_control", "immersive.full=cn.colafans.sas,com.android.settings");
+            if (buttonView.isPressed()) {
+                AppInfo appInfo = mAppList.get(position);
+                appInfo.isFullScreen = buttonView.isChecked();
+                if (appInfo.isFullScreen) {
+                    if (TextUtils.isEmpty(config)) {
+                        config = "immersive.full=";
+                    }
+                    config = config + appInfo.pkgName + ",";
                 } else {
-                    Settings.Global.putString(mContext.getContentResolver(), "policy_control", "null");
+                    config = config.replace(appInfo.pkgName, "");
                 }
+                Settings.Global.putString(mContext.getContentResolver(), "policy_control", config);
             }
         });
+
     }
 
     private void initData() {
@@ -157,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PackageManager pm = getPackageManager();
         List<ResolveInfo> allApps = pm.queryIntentActivities(mainIntent, 0);
+        config = Settings.Global.getString(mContext.getContentResolver(), "policy_control");
 
         for (ResolveInfo res : allApps) {
             Log.d(TAG, "App Info: packageName = " + res.activityInfo.packageName
@@ -193,6 +182,11 @@ public class MainActivity extends AppCompatActivity {
         appItem.clzName = res.activityInfo.name;
         appItem.appName = res.loadLabel(pm).toString();
         appItem.allappIcon = String.valueOf(res.getIconResource());
+        Log.d(TAG, "createAppInfo: " + config);
+        if (!TextUtils.isEmpty(config)) {
+            appItem.isFullScreen = config.contains(appItem.pkgName);
+        }
+        Log.d(TAG, "createAppInfo: " + appItem.isFullScreen);
         try {
             appItem.icon = pm.getApplicationIcon(appItem.pkgName);
         } catch (PackageManager.NameNotFoundException e) {

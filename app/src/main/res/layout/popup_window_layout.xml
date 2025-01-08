@@ -14,15 +14,6 @@
         app:layout_constraintTop_toTopOf="parent"
         skin:enable="true">
 
-
-        <Switch
-            android:id="@+id/sb_full_screen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_app_config"
             android:layout_width="match_parent"

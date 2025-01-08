@@ -9,5 +9,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="main_background">#fff2f7ff</color>
     <color name="pop_background">#f4f8bb</color>
-    <color name="hint_tv_color">#ff00ff</color>
+    <color name="hint_tv_color">#000000</color>
 </resources>

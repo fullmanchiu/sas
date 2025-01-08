@@ -43,6 +43,7 @@ public class AppConfigAdapter extends RecyclerView.Adapter<AppConfigAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         AppInfo appInfo = mAppList.get(position);
+        holder.switchConfig.setChecked(appInfo.isFullScreen);
         holder.appIcon.setImageDrawable(appInfo.icon);
         holder.appName.setText(appInfo.appName);
     }

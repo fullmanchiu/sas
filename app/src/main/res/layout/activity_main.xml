@@ -30,6 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/dp_24"
             android:gravity="center_horizontal"
+            android:textColor="@color/hint_tv_color"
             android:text="@string/app_hint"
             android:textSize="@dimen/dp_14"
             app:layout_constraintBottom_toBottomOf="parent" />
